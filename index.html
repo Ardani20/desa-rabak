@@ -1,0 +1,1678 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="data/ADMINISTRASIDESA_AR_25K_1.js"></script>
+        <script src="data/Sawah_2.js"></script>
+        <script src="data/sungai_3.js"></script>
+        <script src="data/batasrw_4.js"></script>
+        <script src="data/pemakaman_5.js"></script>
+        <script src="data/batasrt_6.js"></script>
+        <script src="data/Bagunan_7.js"></script>
+        <script src="data/lapangan_8.js"></script>
+        <script src="data/jalan_9.js"></script>
+        <script src="data/namabangunan_10.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString' || e.target.feature.geometry.type === 'MultiLineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+            highlightLayer.openPopup();
+        }
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-7.442913567363914,109.33005041946194],[-7.428669690799748,109.36366210103756]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_GoogleSatellite_0');
+        map.getPane('pane_GoogleSatellite_0').style.zIndex = 400;
+        var layer_GoogleSatellite_0 = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            pane: 'pane_GoogleSatellite_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.google.at/permissions/geoguidelines/attr-guide.html">Map data ©2015 Google</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 20
+        });
+        layer_GoogleSatellite_0;
+        map.addLayer(layer_GoogleSatellite_0);
+        function pop_ADMINISTRASIDESA_AR_25K_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDPPUM'] !== null ? autolinker.link(feature.properties['KDPPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['NAMOBJ'] !== null ? autolinker.link(feature.properties['NAMOBJ'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['REMARK'] !== null ? autolinker.link(feature.properties['REMARK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDPBPS'] !== null ? autolinker.link(feature.properties['KDPBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['FCODE'] !== null ? autolinker.link(feature.properties['FCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LUASWH'] !== null ? autolinker.link(feature.properties['LUASWH'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['UUPP'] !== null ? autolinker.link(feature.properties['UUPP'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SRS_ID'] !== null ? autolinker.link(feature.properties['SRS_ID'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['LCODE'] !== null ? autolinker.link(feature.properties['LCODE'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['METADATA'] !== null ? autolinker.link(feature.properties['METADATA'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDEBPS'] !== null ? autolinker.link(feature.properties['KDEBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDEPUM'] !== null ? autolinker.link(feature.properties['KDEPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDCBPS'] !== null ? autolinker.link(feature.properties['KDCBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDCPUM'] !== null ? autolinker.link(feature.properties['KDCPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDBBPS'] !== null ? autolinker.link(feature.properties['KDBBPS'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['KDBPUM'] !== null ? autolinker.link(feature.properties['KDBPUM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKD'] !== null ? autolinker.link(feature.properties['WADMKD'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKD'] !== null ? autolinker.link(feature.properties['WIADKD'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKC'] !== null ? autolinker.link(feature.properties['WADMKC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKC'] !== null ? autolinker.link(feature.properties['WIADKC'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMKK'] !== null ? autolinker.link(feature.properties['WADMKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADKK'] !== null ? autolinker.link(feature.properties['WIADKK'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WADMPR'] !== null ? autolinker.link(feature.properties['WADMPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['WIADPR'] !== null ? autolinker.link(feature.properties['WIADPR'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['TIPADM'] !== null ? autolinker.link(feature.properties['TIPADM'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Leng'] !== null ? autolinker.link(feature.properties['SHAPE_Leng'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['SHAPE_Area'] !== null ? autolinker.link(feature.properties['SHAPE_Area'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ADMINISTRASIDESA_AR_25K_1_0() {
+            return {
+                pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+                opacity: 1,
+                color: 'rgba(255,127,0,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 4.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ADMINISTRASIDESA_AR_25K_1');
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_1').style.zIndex = 401;
+        map.getPane('pane_ADMINISTRASIDESA_AR_25K_1').style['mix-blend-mode'] = 'normal';
+        var layer_ADMINISTRASIDESA_AR_25K_1 = new L.geoJson(json_ADMINISTRASIDESA_AR_25K_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ADMINISTRASIDESA_AR_25K_1',
+            layerName: 'layer_ADMINISTRASIDESA_AR_25K_1',
+            pane: 'pane_ADMINISTRASIDESA_AR_25K_1',
+            onEachFeature: pop_ADMINISTRASIDESA_AR_25K_1,
+            style: style_ADMINISTRASIDESA_AR_25K_1_0,
+        });
+        bounds_group.addLayer(layer_ADMINISTRASIDESA_AR_25K_1);
+        map.addLayer(layer_ADMINISTRASIDESA_AR_25K_1);
+        function pop_Sawah_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Nama'] !== null ? autolinker.link(feature.properties['Nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Sawah_2_0() {
+            return {
+                pane: 'pane_Sawah_2',
+                interactive: true,
+            }
+        }
+        function style_Sawah_2_1() {
+            return {
+                pane: 'pane_Sawah_2',
+                opacity: 1,
+                color: 'rgba(153,153,30,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Sawah_2');
+        map.getPane('pane_Sawah_2').style.zIndex = 402;
+        map.getPane('pane_Sawah_2').style['mix-blend-mode'] = 'normal';
+        var layer_Sawah_2 = new L.geoJson.multiStyle(json_Sawah_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Sawah_2',
+            layerName: 'layer_Sawah_2',
+            pane: 'pane_Sawah_2',
+            onEachFeature: pop_Sawah_2,
+            styles: [style_Sawah_2_0,style_Sawah_2_1,]
+        });
+        bounds_group.addLayer(layer_Sawah_2);
+        map.addLayer(layer_Sawah_2);
+        function pop_sungai_3(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_sungai_3_0() {
+            return {
+                pane: 'pane_sungai_3',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 8.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        function style_sungai_3_1() {
+            return {
+                pane: 'pane_sungai_3',
+                opacity: 1,
+                color: 'rgba(31,120,180,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 6.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_sungai_3');
+        map.getPane('pane_sungai_3').style.zIndex = 403;
+        map.getPane('pane_sungai_3').style['mix-blend-mode'] = 'normal';
+        var layer_sungai_3 = new L.geoJson.multiStyle(json_sungai_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_sungai_3',
+            layerName: 'layer_sungai_3',
+            pane: 'pane_sungai_3',
+            onEachFeature: pop_sungai_3,
+            styles: [style_sungai_3_0,style_sungai_3_1,]
+        });
+        bounds_group.addLayer(layer_sungai_3);
+        map.addLayer(layer_sungai_3);
+        function pop_batasrw_4(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_batasrw_4_0(feature) {
+            switch(String(feature.properties['nama'])) {
+                case 'RW 01':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,18,97,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RW 02':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(30,43,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RW 03':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,215,113,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RW 04':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(42,222,231,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RW 05':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(193,92,221,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RW 06':
+                    return {
+                pane: 'pane_batasrw_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(78,230,109,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_batasrw_4');
+        map.getPane('pane_batasrw_4').style.zIndex = 404;
+        map.getPane('pane_batasrw_4').style['mix-blend-mode'] = 'normal';
+        var layer_batasrw_4 = new L.geoJson(json_batasrw_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_batasrw_4',
+            layerName: 'layer_batasrw_4',
+            pane: 'pane_batasrw_4',
+            onEachFeature: pop_batasrw_4,
+            style: style_batasrw_4_0,
+        });
+        bounds_group.addLayer(layer_batasrw_4);
+        map.addLayer(layer_batasrw_4);
+        function pop_pemakaman_5(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_pemakaman_5_0() {
+            return {
+                pane: 'pane_pemakaman_5',
+                opacity: 1,
+                color: 'rgba(247,247,247,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(82,82,82,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_pemakaman_5');
+        map.getPane('pane_pemakaman_5').style.zIndex = 405;
+        map.getPane('pane_pemakaman_5').style['mix-blend-mode'] = 'normal';
+        var layer_pemakaman_5 = new L.geoJson(json_pemakaman_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_pemakaman_5',
+            layerName: 'layer_pemakaman_5',
+            pane: 'pane_pemakaman_5',
+            onEachFeature: pop_pemakaman_5,
+            style: style_pemakaman_5_0,
+        });
+        bounds_group.addLayer(layer_pemakaman_5);
+        map.addLayer(layer_pemakaman_5);
+        function pop_batasrt_6(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_batasrt_6_0(feature) {
+            switch(String(feature.properties['nama'])) {
+                case 'RT 1/RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(29,210,183,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 10/ RW02':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(169,206,115,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 11/ RW02':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(64,181,231,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 12/ RW02':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(105,51,222,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 13/ RW02':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(174,202,91,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 14/ RW 03':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,42,53,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 15/ RW 03':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(106,235,46,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 16/ RW 03':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(131,217,143,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 17/ RW 03':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(104,203,84,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 18/ RW 03':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,23,92,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 19/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(234,69,19,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 2/RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(68,39,214,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 20/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(35,129,206,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 21/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(90,206,173,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 22/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(14,39,226,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 23/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(85,123,227,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 24/ RW 04':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(161,95,237,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 25/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(89,202,222,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 26/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(95,150,228,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 27/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(221,215,36,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 28/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(166,59,232,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 29/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(127,239,173,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 3/RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(239,141,36,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 30/ RW 05':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(236,172,132,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 31/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(222,119,215,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 32/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(89,84,213,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 33/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(200,151,53,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 34/ / RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(31,218,218,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 35/ / RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(118,236,149,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 36/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(229,109,133,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 37/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(225,137,194,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 38/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(210,50,224,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 39/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(224,76,62,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 4/ RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(31,236,28,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 40/ RW 06':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(211,224,90,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 5/ RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(184,57,223,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 6/ RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(120,213,173,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 7/ RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(215,45,178,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 8/ RW 01':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(213,29,121,1.0)',
+                interactive: true,
+            }
+                    break;
+                case 'RT 9/ RW02':
+                    return {
+                pane: 'pane_batasrt_6',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(208,187,91,1.0)',
+                interactive: true,
+            }
+                    break;
+            }
+        }
+        map.createPane('pane_batasrt_6');
+        map.getPane('pane_batasrt_6').style.zIndex = 406;
+        map.getPane('pane_batasrt_6').style['mix-blend-mode'] = 'normal';
+        var layer_batasrt_6 = new L.geoJson(json_batasrt_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_batasrt_6',
+            layerName: 'layer_batasrt_6',
+            pane: 'pane_batasrt_6',
+            onEachFeature: pop_batasrt_6,
+            style: style_batasrt_6_0,
+        });
+        bounds_group.addLayer(layer_batasrt_6);
+        map.addLayer(layer_batasrt_6);
+        function pop_Bagunan_7(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['fid'] !== null ? autolinker.link(feature.properties['fid'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['full_id'] !== null ? autolinker.link(feature.properties['full_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_id'] !== null ? autolinker.link(feature.properties['osm_id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['osm_type'] !== null ? autolinker.link(feature.properties['osm_type'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building'] !== null ? autolinker.link(feature.properties['building'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['layer'] !== null ? autolinker.link(feature.properties['layer'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['type:id'] !== null ? autolinker.link(feature.properties['type:id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building:structure'] !== null ? autolinker.link(feature.properties['building:structure'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['addr:housename'] !== null ? autolinker.link(feature.properties['addr:housename'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['capacity:persons'] !== null ? autolinker.link(feature.properties['capacity:persons'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building:walls'] !== null ? autolinker.link(feature.properties['building:walls'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building:roof'] !== null ? autolinker.link(feature.properties['building:roof'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['building:levels'] !== null ? autolinker.link(feature.properties['building:levels'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['access:roof'] !== null ? autolinker.link(feature.properties['access:roof'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['service_times'] !== null ? autolinker.link(feature.properties['service_times'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['religion'] !== null ? autolinker.link(feature.properties['religion'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['opening_hours'] !== null ? autolinker.link(feature.properties['opening_hours'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['name'] !== null ? autolinker.link(feature.properties['name'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['denomination'] !== null ? autolinker.link(feature.properties['denomination'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['amenity'] !== null ? autolinker.link(feature.properties['amenity'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Bagunan_7_0() {
+            return {
+                pane: 'pane_Bagunan_7',
+                opacity: 1,
+                color: 'rgba(102,51,24,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(179,90,42,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Bagunan_7');
+        map.getPane('pane_Bagunan_7').style.zIndex = 407;
+        map.getPane('pane_Bagunan_7').style['mix-blend-mode'] = 'normal';
+        var layer_Bagunan_7 = new L.geoJson(json_Bagunan_7, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Bagunan_7',
+            layerName: 'layer_Bagunan_7',
+            pane: 'pane_Bagunan_7',
+            onEachFeature: pop_Bagunan_7,
+            style: style_Bagunan_7_0,
+        });
+        bounds_group.addLayer(layer_Bagunan_7);
+        map.addLayer(layer_Bagunan_7);
+        function pop_lapangan_8(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_lapangan_8_0() {
+            return {
+                pane: 'pane_lapangan_8',
+                stroke: false, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(25,153,18,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_lapangan_8');
+        map.getPane('pane_lapangan_8').style.zIndex = 408;
+        map.getPane('pane_lapangan_8').style['mix-blend-mode'] = 'normal';
+        var layer_lapangan_8 = new L.geoJson(json_lapangan_8, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_lapangan_8',
+            layerName: 'layer_lapangan_8',
+            pane: 'pane_lapangan_8',
+            onEachFeature: pop_lapangan_8,
+            style: style_lapangan_8_0,
+        });
+        bounds_group.addLayer(layer_lapangan_8);
+        map.addLayer(layer_lapangan_8);
+        function pop_jalan_9(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td class="visible-with-data" id="id"colspan="2"><strong>id</strong><br />' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['lebar'] !== null ? autolinker.link(feature.properties['lebar'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_jalan_9_0() {
+            return {
+                pane: 'pane_jalan_9',
+                opacity: 1,
+                color: 'rgba(0,0,0,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 9.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        function style_jalan_9_1() {
+            return {
+                pane: 'pane_jalan_9',
+                opacity: 1,
+                color: 'rgba(255,255,255,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'round',
+                weight: 7.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_jalan_9');
+        map.getPane('pane_jalan_9').style.zIndex = 409;
+        map.getPane('pane_jalan_9').style['mix-blend-mode'] = 'normal';
+        var layer_jalan_9 = new L.geoJson.multiStyle(json_jalan_9, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_jalan_9',
+            layerName: 'layer_jalan_9',
+            pane: 'pane_jalan_9',
+            onEachFeature: pop_jalan_9,
+            styles: [style_jalan_9_0,style_jalan_9_1,]
+        });
+        bounds_group.addLayer(layer_jalan_9);
+        map.addLayer(layer_jalan_9);
+        function pop_namabangunan_10(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (var i in e.target._eventParents) {
+                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
+                            e.target._eventParents[i].resetStyle(e.target);
+                        }
+                    }
+                    if (typeof layer.closePopup == 'function') {
+                        layer.closePopup();
+                    } else {
+                        layer.eachLayer(function(feature){
+                            feature.closePopup()
+                        });
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['nama'] !== null ? autolinker.link(feature.properties['nama'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_namabangunan_10_0() {
+            return {
+                pane: 'pane_namabangunan_10',
+                radius: 4.0,
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1,
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(227,26,28,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_namabangunan_10');
+        map.getPane('pane_namabangunan_10').style.zIndex = 410;
+        map.getPane('pane_namabangunan_10').style['mix-blend-mode'] = 'normal';
+        var layer_namabangunan_10 = new L.geoJson(json_namabangunan_10, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_namabangunan_10',
+            layerName: 'layer_namabangunan_10',
+            pane: 'pane_namabangunan_10',
+            onEachFeature: pop_namabangunan_10,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.circleMarker(latlng, style_namabangunan_10_0(feature));
+            },
+        });
+        bounds_group.addLayer(layer_namabangunan_10);
+        map.addLayer(layer_namabangunan_10);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var overlaysTree = [
+            {label: '<img src="legend/namabangunan_10.png" /> nama bangunan', layer: layer_namabangunan_10},
+            {label: '<img src="legend/jalan_9.png" /> jalan', layer: layer_jalan_9},
+            {label: '<img src="legend/lapangan_8.png" /> lapangan', layer: layer_lapangan_8},
+            {label: '<img src="legend/Bagunan_7.png" /> Bagunan', layer: layer_Bagunan_7},
+            {label: 'batas rt<br /><table><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT1RW010.png" /></td><td>RT 1/RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT10RW021.png" /></td><td>RT 10/ RW02</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT11RW022.png" /></td><td>RT 11/ RW02</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT12RW023.png" /></td><td>RT 12/ RW02</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT13RW024.png" /></td><td>RT 13/ RW02</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT14RW035.png" /></td><td>RT 14/ RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT15RW036.png" /></td><td>RT 15/ RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT16RW037.png" /></td><td>RT 16/ RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT17RW038.png" /></td><td>RT 17/ RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT18RW039.png" /></td><td>RT 18/ RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT19RW0410.png" /></td><td>RT 19/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT2RW0111.png" /></td><td>RT 2/RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT20RW0412.png" /></td><td>RT 20/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT21RW0413.png" /></td><td>RT 21/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT22RW0414.png" /></td><td>RT 22/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT23RW0415.png" /></td><td>RT 23/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT24RW0416.png" /></td><td>RT 24/ RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT25RW0517.png" /></td><td>RT 25/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT26RW0518.png" /></td><td>RT 26/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT27RW0519.png" /></td><td>RT 27/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT28RW0520.png" /></td><td>RT 28/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT29RW0521.png" /></td><td>RT 29/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT3RW0122.png" /></td><td>RT 3/RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT30RW0523.png" /></td><td>RT 30/ RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT31RW0624.png" /></td><td>RT 31/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT32RW0625.png" /></td><td>RT 32/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT33RW0626.png" /></td><td>RT 33/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT34RW0627.png" /></td><td>RT 34/ / RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT35RW0628.png" /></td><td>RT 35/ / RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT36RW0629.png" /></td><td>RT 36/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT37RW0630.png" /></td><td>RT 37/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT38RW0631.png" /></td><td>RT 38/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT39RW0632.png" /></td><td>RT 39/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT4RW0133.png" /></td><td>RT 4/ RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT40RW0634.png" /></td><td>RT 40/ RW 06</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT5RW0135.png" /></td><td>RT 5/ RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT6RW0136.png" /></td><td>RT 6/ RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT7RW0137.png" /></td><td>RT 7/ RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT8RW0138.png" /></td><td>RT 8/ RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrt_6_RT9RW0239.png" /></td><td>RT 9/ RW02</td></tr></table>', layer: layer_batasrt_6},
+            {label: '<img src="legend/pemakaman_5.png" /> pemakaman', layer: layer_pemakaman_5},
+            {label: 'batas rw<br /><table><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW010.png" /></td><td>RW 01</td></tr><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW021.png" /></td><td>RW 02</td></tr><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW032.png" /></td><td>RW 03</td></tr><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW043.png" /></td><td>RW 04</td></tr><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW054.png" /></td><td>RW 05</td></tr><tr><td style="text-align: center;"><img src="legend/batasrw_4_RW065.png" /></td><td>RW 06</td></tr></table>', layer: layer_batasrw_4},
+            {label: '<img src="legend/sungai_3.png" /> sungai', layer: layer_sungai_3},
+            {label: '<img src="legend/Sawah_2.png" /> Sawah', layer: layer_Sawah_2},
+            {label: '<img src="legend/ADMINISTRASIDESA_AR_25K_1.png" /> ADMINISTRASIDESA_AR_25K', layer: layer_ADMINISTRASIDESA_AR_25K_1},
+            {label: "Google Satellite", layer: layer_GoogleSatellite_0, radioGroup: 'bm' },]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_batasrw_4.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama'] !== null?String('<div style="color: #000000; font-size: 7pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_batasrw_4'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_pemakaman_5.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama'] !== null?String('<div style="color: #000000; font-size: 12pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_pemakaman_5'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_batasrt_6.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama'] !== null?String('<div style="color: #000000; font-size: 4pt; font-weight: bold; font-family: \'Arial\', sans-serif;">' + layer.feature.properties['nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_batasrt_6'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_lapangan_8.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama'] !== null?String('<div style="color: #000000; font-size: 11pt; font-family: \'Mongolian Baiti\', sans-serif;">' + layer.feature.properties['nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_lapangan_8'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        var i = 0;
+        layer_jalan_9.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['nama'] !== null?String('<div style="color: #000000; font-size: 10pt; font-weight: bold; font-family: \'Segoe UI Black\', sans-serif;">' + layer.feature.properties['nama']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_jalan_9'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_batasrw_4,layer_pemakaman_5,layer_batasrt_6,layer_lapangan_8,layer_jalan_9,layer_namabangunan_10]);
+        map.on("zoomend", function(){
+            resetLabels([layer_batasrw_4,layer_pemakaman_5,layer_batasrt_6,layer_lapangan_8,layer_jalan_9,layer_namabangunan_10]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_batasrw_4,layer_pemakaman_5,layer_batasrt_6,layer_lapangan_8,layer_jalan_9,layer_namabangunan_10]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_batasrw_4,layer_pemakaman_5,layer_batasrt_6,layer_lapangan_8,layer_jalan_9,layer_namabangunan_10]);
+        });
+        </script>
+    </body>
+</html>
